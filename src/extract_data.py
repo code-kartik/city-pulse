@@ -11,13 +11,13 @@ load_dotenv()  # Load environment variables from .env file
 def fetch_and_store_weather_data(lat, lon):
     # Fetch data from OpenWeather API
     api_key = os.getenv("OPEN_WEATHER_API_KEY")
-    api_endpoint = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}"
+    api_endpoint = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&units=metric&appid={api_key}"
 
     response = requests.get(api_endpoint)
     if response.status_code == 200:
         bronze_df = pd.DataFrame({
-            "timestamp_now":[datetime.now(pytz.utc)],
-            "raw_pyload":[json.dumps(response.json())]
+            "ingestion_time":[datetime.now(pytz.utc)],
+            "raw_payload":[json.dumps(response.json())]
         })
         os.makedirs("data/bronze", exist_ok=True)
         bronze_df.to_parquet("data/bronze/weather_raw.parquet", engine="pyarrow")
@@ -34,8 +34,8 @@ def fetch_and_store_traffic_data(lat, lon):
     response = requests.get(api_endpoint)
     if response.status_code == 200:
         bronze_df = pd.DataFrame({
-            "timestamp_now":[datetime.now(pytz.utc)],
-            "raw_pyload":[json.dumps(response.json())]
+            "ingestion_time":[datetime.now(pytz.utc)],
+            "raw_payload":[json.dumps(response.json())]
         })
         os.makedirs("data/bronze", exist_ok=True)
         bronze_df.to_parquet("data/bronze/traffic_raw.parquet", engine="pyarrow")
