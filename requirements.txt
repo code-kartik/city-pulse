@@ -1,0 +1,6 @@
+requests
+pandas
+pyarrow
+pytz
+python-dotenv
+streamlit
