@@ -26,11 +26,11 @@ def transform_weather_data():
         weather_data = json.loads(raw_payload)  # parse the raw JSON string into a Python dictionary/object
         transformed_data = {
             "datetime": generalise_timestamp(weather_data.get("dt")),
-            "temperature": weather_data["main"]["temp"],
-            "humidity": weather_data["main"]["humidity"],
-            "pressure": weather_data["main"]["pressure"],
-            "weather_description": weather_data["weather"][0]["description"],
-            "wind_speed": weather_data["wind"]["speed"]
+            "temperature": weather_data.get("main", {}).get("temp"),
+            "weather_description": weather_data.get("weather", [{}])[0].get("description", "Unknown"),
+            "humidity": weather_data.get("main", {}).get("humidity"),
+            "pressure": weather_data.get("main", {}).get("pressure"),
+            "wind_speed": weather_data.get("wind", {}).get("speed")
         }
         silver_df = pd.DataFrame([transformed_data])
         os.makedirs("data/silver", exist_ok=True)
@@ -46,12 +46,19 @@ def transform_traffic_data():
         bronze_df = pd.read_parquet(path, engine="pyarrow")  # read the parquet file into a pandas DataFrame using pyarrow
         raw_payload = bronze_df["raw_payload"].iloc[0]  # extract the raw JSON payload from the first row of the DataFrame
         traffic_data = json.loads(raw_payload)  # parse the raw JSON string into a Python dictionary/object
+        flow_segment = traffic_data.get("flowSegmentData", {})
+        current_speed = traffic_data.get("flowSegmentData", {}).get("currentSpeed", 1)
+        free_flow = traffic_data.get("flowSegmentData", {}).get("freeFlowSpeed", 1)
+        congestion_pct = round(max(0, (1 - (current_speed / free_flow)) * 100), 2) 
+
         transformed_data = {
-            "datetime": generalise_timestamp(traffic_data.get("flowSegmentData", {}).get("currentSpeed", None)),
-            "current_speed": traffic_data["flowSegmentData"]["currentSpeed"],
-            "free_flow_speed": traffic_data["flowSegmentData"]["freeFlowSpeed"],
-            "confidence": traffic_data["flowSegmentData"]["confidence"]
+            "datetime": generalise_timestamp(None),
+            "current_speed": current_speed,
+            "free_flow_speed": free_flow,
+            "congestion_pct": congestion_pct,
+            "confidence": flow_segment.get("confidence")
         }
+        
         silver_df = pd.DataFrame([transformed_data])
         os.makedirs("data/silver", exist_ok=True)
         silver_df.to_parquet("data/silver/traffic_transformed.parquet", engine="pyarrow")
