@@ -58,7 +58,7 @@ def transform_traffic_data():
             "congestion_pct": congestion_pct,
             "confidence": flow_segment.get("confidence")
         }
-        
+
         silver_df = pd.DataFrame([transformed_data])
         os.makedirs("data/silver", exist_ok=True)
         silver_df.to_parquet("data/silver/traffic_transformed.parquet", engine="pyarrow")
@@ -66,15 +66,3 @@ def transform_traffic_data():
     else:
         print("Traffic data not found.")
         return None
-
-if __name__ == "__main__":
-    weather_data = transform_weather_data()
-    traffic_data = transform_traffic_data()
-    if weather_data:
-        print(weather_data)
-    else:
-        print("Failed to transform weather data.")
-    if traffic_data:
-        print(traffic_data)
-    else:
-        print("Failed to transform traffic data.")

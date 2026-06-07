@@ -25,7 +25,3 @@ def load_transformed_data():
 
         final_df.to_parquet(gold_path, engine="pyarrow")
         print("Transformed data loaded into gold layer.")
-
-
-if __name__ == "__main__":
-    load_transformed_data()

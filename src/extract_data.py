@@ -44,22 +44,3 @@ def fetch_and_store_traffic_data(lat, lon):
     else:
         print(f"Error fetching traffic data: {response.status_code}")
         return None
-    
-# TODO: Remove function invocation in this file and move it to a separate script (e.g., main.py) to avoid executing it when imported as a module.
-
-if __name__ == "__main__":
-    # Example coordinates for a city (e.g., New York City)
-    latitude = 40.7128
-    longitude = -74.0060
-    
-    weather_data = fetch_and_store_weather_data(latitude, longitude)
-    if weather_data:
-        print(weather_data)
-    else:
-        print("Failed to retrieve weather data.")
-
-    traffic_data = fetch_and_store_traffic_data(latitude, longitude)
-    if traffic_data:
-        print(traffic_data)
-    else:
-        print("Failed to retrieve traffic data.")

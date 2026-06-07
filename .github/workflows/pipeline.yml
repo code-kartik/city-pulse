@@ -1,0 +1,56 @@
+name: City Pulse ETL
+
+on:
+  schedule:
+    # 8:00 AM IST
+    - cron: '30 2 * * *'
+    # 1:00 PM IST
+    - cron: '30 7 * * *'
+    # 6:00 PM IST
+    - cron: '30 12 * * *'
+  workflow_dispatch: 
+    # Adds a button to trigger it manually from the GitHub UI
+
+permissions:
+  contents: write 
+
+jobs:
+  run-data-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true 
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip' 
+
+      - name: Install Requirements
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute ETL Pipeline
+        env:
+          OPEN_WEATHER_API_KEY: ${{ secrets.OPEN_WEATHER_API_KEY }}
+          TOMTOM_API_KEY: ${{ secrets.TOMTOM_API_KEY }}
+          TARGET_LAT: ${{ secrets.TARGET_LAT }}
+          TARGET_LON: ${{ secrets.TARGET_LON }}
+        run: |
+          # Set the PYTHONPATH so the imports in main.py work flawlessly
+          export PYTHONPATH=src
+          python src/main.py
+
+      - name: Commit and Push New Data
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add data/
+          
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Automated ETL: Appended new Gold data" && git push)
