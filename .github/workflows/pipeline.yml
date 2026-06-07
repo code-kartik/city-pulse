@@ -2,12 +2,8 @@ name: City Pulse ETL
 
 on:
   schedule:
-    # 8:00 AM IST
-    - cron: '30 2 * * *'
-    # 1:00 PM IST
-    - cron: '30 7 * * *'
-    # 6:00 PM IST
-    - cron: '30 12 * * *'
+    # Run every 30 minutes
+    - cron: '*/30 * * * *'
   workflow_dispatch: 
     # Adds a button to trigger it manually from the GitHub UI
 
